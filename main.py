@@ -180,7 +180,7 @@ class Board:
 
     def get_size(self):
         a = self.width * self.cell_size
-        return [max(400, a + 50), max(400, a + 150)]
+        return [max(400, a + 50), max(400, a + 225)]
 
     def get_score(self):
         return self.score
@@ -198,7 +198,7 @@ class ListWidget:
     def draw(self, screen):
         font = pygame.font.SysFont('Comic Sans MS', self.scale * 3 // 5)
         if self.waiting is False:
-            pygame.draw.rect(screen, 'black', (self.pos, (self.width * self.scale, 1 * self.scale)), 1)
+            pygame.draw.rect(screen, 'black', (self.pos, (self.width * self.scale + 1, 1 * self.scale + 1)), 1)
             text = font.render(self.cur, False, (0, 0, 0))
             screen.blit(text, (self.x, self.y))
         else:
@@ -245,6 +245,10 @@ def update(screen):
     font = pygame.font.SysFont('Comic Sans MS', 30)
     text = font.render('Size:', False, (0, 0, 0))
     screen.blit(text, (25, 25))
+    text = font.render('Gravity:', False, (0, 0, 0))
+    screen.blit(text, (165, 25))
+    text = font.render('Autorotating:', False, (0, 0, 0))
+    screen.blit(text, (25, 100))
     size_list.draw(screen)
     moves_list.draw(screen)
     gravity_list.draw(screen)
@@ -299,19 +303,19 @@ pygame.display.set_caption('Super 2048')
 # consts
 n = 12
 side = 50
-size = width, height = (n + 1) * side, (n + 5) * side
+size = width, height = (n + 1) * side, (n + 6) * side
 screen = pygame.display.set_mode(size)
 # init
 board = Board(n)
-board.set_view(25, 125, 50)
+board.set_view(25, 200, 50)
 size_list = ListWidget([100, 25, 50, 1])
-size_list.set_choices([str(i) for i in range(5, 13)])
+size_list.set_choices([' ' + str(i) for i in range(5, 13)])
 size_list.choose(7)
-moves_list = ListWidget([175, 25, 50, 3])
-moves_list.set_choices(['manual', 'rotation', 'up-down', 'left-right', 'random'])
+moves_list = ListWidget([225, 100, 50, 3])
+moves_list.set_choices(['   manual', '  rotation', '  up-down', ' left-right', '  random'])
 moves_list.choose(0)
-gravity_list = ListWidget([350, 25, 50, 2])
-gravity_list.set_choices(['none', 'down', 'left', 'up', 'right'])
+gravity_list = ListWidget([280, 25, 50, 1.75])
+gravity_list.set_choices([' none', ' down', '  left', '   up', ' right'])
 gravity_list.choose(0)
 dialog = UpdateDialog('Are you sure?')
 lost = UpdateDialog('Start new game?')
@@ -328,22 +332,22 @@ while running:
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 t = lost.get_ans(event.pos, board.get_size())
                 if t:
-                    board.rebuild(int(size_list.get_current()))
+                    board.rebuild(int(size_list.get_current().lstrip(' ')))
                     lost.hide()
                     board.add(lost)
                     moves_list.choose(0)
                     gravity_list.choose(0)
                 elif t is False:
                     running = False
-    elif size_list.get_current() != str(n):
+    elif size_list.get_current().lstrip(' ') != str(n):
         dialog.show()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if dialog.get_ans(event.pos, board.get_size()):
-                    n = int(size_list.get_current())
-                    size = width, height = max((n + 1) * side, 400), max((n + 5) * side, 450)
+                    n = int(size_list.get_current().lstrip(' '))
+                    size = width, height = max((n + 1) * side, 400), (n + 6) * side
                     screen = pygame.display.set_mode(size)
                     board.rebuild(n)
                     dialog.hide()
@@ -354,7 +358,7 @@ while running:
     else:
         cnt += 1
         if cnt % p == 0:
-            way = gravity_list.get_current()
+            way = gravity_list.get_current().lstrip(' ')
             if way != 'none':
                 flag += 1
                 board.move(way)
@@ -362,7 +366,7 @@ while running:
                     board.add(lost)
             else:
                 flag = 0
-            automatation = moves_list.get_current()
+            automatation = moves_list.get_current().lstrip(' ')
             if automatation != 'manual':
                 sides = ['up', 'right', 'down', 'left']
                 if automatation == 'random':
@@ -378,7 +382,7 @@ while running:
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN:
-                if moves_list.get_current() == 'manual':
+                if moves_list.get_current().lstrip(' ') == 'manual':
                     flag = False
                     if event.key == pygame.K_UP:
                         flag = board.move('up')
