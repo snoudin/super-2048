@@ -242,7 +242,7 @@ class ListWidget:
 def update(screen):
     screen.fill('#fddca5')
     board.render(screen)
-    font = pygame.font.SysFont('Comic Sans MS', 30)
+    font = pygame.font.SysFont('arial', 40)
     text = font.render('Size:', False, (0, 0, 0))
     screen.blit(text, (25, 25))
     text = font.render('Gravity:', False, (0, 0, 0))
@@ -254,7 +254,7 @@ def update(screen):
     gravity_list.draw(screen)
     dialog.draw(screen, board.get_size())
     lost.draw(screen, board.get_size())
-    font = pygame.font.SysFont('Comic Sans MS', 50)
+    font = pygame.font.SysFont('arial', 50)
     text = font.render('Score: ' + str(board.get_score()), False, (0, 0, 0))
     screen.blit(text, (25, board.get_size()[1]))
     pygame.display.flip()
