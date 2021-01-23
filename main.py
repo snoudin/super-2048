@@ -240,7 +240,7 @@ class ListWidget:
 
 
 def update(screen):
-    screen.fill((255, 255, 255))
+    screen.fill('#fddca5')
     board.render(screen)
     font = pygame.font.SysFont('Comic Sans MS', 30)
     text = font.render('Size:', False, (0, 0, 0))
