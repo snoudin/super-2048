@@ -14,6 +14,7 @@ class Board:
         self.colors = []
         self.generate_colors()
         self.score = 0
+        self.none = pygame.image.load(r'images\none.png')
 
     def generate_colors(self):
         self.colors = sns.color_palette("Spectral", 30)
@@ -55,17 +56,22 @@ class Board:
         self.cell_size = cell_size
 
     def render(self, screen):
+        pygame.draw.rect(screen, '#998f70', (self.left - 4, self.top - 4, self.width * self.cell_size + 10, self.width * self.cell_size + 10), 0)
         for i in range(self.width):
             for j in range(self.width):
-                pygame.draw.rect(screen, 'black', (self.left + j * self.cell_size,
-                                                   self.top + i * self.cell_size,
-                                                   self.cell_size + 1, self.cell_size + 1), 1)
                 if self.board[i][j] is not None:
                     pygame.draw.rect(screen, self.colors[self.board[i][j]],
-                                     (self.left + j * self.cell_size + 1,
-                                      self.top + i * self.cell_size + 1,
-                                      self.cell_size, self.cell_size), 0)
+                                     (self.left + j * self.cell_size + 3,
+                                      self.top + i * self.cell_size + 3,
+                                      self.cell_size - 4, self.cell_size - 4), 0)
                     self.print(str(2 ** self.board[i][j]), i, j)
+                else:
+                    screen.blit(self.none, (self.left + j * self.cell_size + 1, self.top + i * self.cell_size + 1))
+
+    def draw_rect(self, i, j, color):
+                pygame.draw.rect(screen, color, (self.left + j * self.cell_size + 1,
+                                                   self.top + i * self.cell_size + 1,
+                                                   self.cell_size, self.cell_size), 1)
 
     def add(self, lost):
         left = set()
@@ -236,6 +242,9 @@ class ListWidget:
 def update(screen):
     screen.fill((255, 255, 255))
     board.render(screen)
+    font = pygame.font.SysFont('Comic Sans MS', 30)
+    text = font.render('Size:', False, (0, 0, 0))
+    screen.blit(text, (25, 25))
     size_list.draw(screen)
     moves_list.draw(screen)
     gravity_list.draw(screen)
@@ -295,13 +304,13 @@ screen = pygame.display.set_mode(size)
 # init
 board = Board(n)
 board.set_view(25, 125, 50)
-size_list = ListWidget([25, 25, 50, 1])
+size_list = ListWidget([100, 25, 50, 1])
 size_list.set_choices([str(i) for i in range(5, 13)])
 size_list.choose(7)
-moves_list = ListWidget([100, 25, 50, 2.5])
+moves_list = ListWidget([175, 25, 50, 3])
 moves_list.set_choices(['manual', 'rotation', 'up-down', 'left-right', 'random'])
 moves_list.choose(0)
-gravity_list = ListWidget([250, 25, 50, 2.5])
+gravity_list = ListWidget([350, 25, 50, 2])
 gravity_list.set_choices(['none', 'down', 'left', 'up', 'right'])
 gravity_list.choose(0)
 dialog = UpdateDialog('Are you sure?')
@@ -310,6 +319,7 @@ board.add(lost)
 # run
 running = True
 cnt, p = 0, 10
+flag = 0
 while running:
     if lost.is_active():
         for event in pygame.event.get():
@@ -346,7 +356,12 @@ while running:
         if cnt % p == 0:
             way = gravity_list.get_current()
             if way != 'none':
+                flag += 1
                 board.move(way)
+                if flag == 1:
+                    board.add(lost)
+            else:
+                flag = 0
             automatation = moves_list.get_current()
             if automatation != 'manual':
                 sides = ['up', 'right', 'down', 'left']
@@ -398,5 +413,7 @@ while running:
                     if list_pos[0] <= event.pos[0] <= list_pos[0] + scale * opened.get_width() and\
                             list_pos[1] <= event.pos[1] <= list_pos[1] + scale * length:
                         opened.choose((event.pos[1] - list_pos[1]) // scale)
+                    if opened == gravity_list:
+                        flag = 0
     update(screen)
 pygame.quit()
