@@ -187,26 +187,26 @@ class Board:
 
 
 class ListWidget:
-    def __init__(self, geometry):
+    def __init__(self, geometry, paths):
         self.x, self.y = self.pos = (geometry[0], geometry[1])
         self.width = geometry[3]
         self.scale = geometry[2]
         self.choices = []
         self.cur = None
         self.waiting = False
+        self.small = pygame.image.load(paths[0])
+        self.big = pygame.image.load(paths[1])
 
     def draw(self, screen):
         font = pygame.font.SysFont('Comic Sans MS', self.scale * 3 // 5)
         if self.waiting is False:
-            pygame.draw.rect(screen, 'black', (self.pos, (self.width * self.scale + 1, 1 * self.scale + 1)), 1)
+            screen.blit(self.small, self.pos)
             text = font.render(self.cur, False, (0, 0, 0))
             screen.blit(text, (self.x, self.y))
         else:
             length = self.get_size()
-            pygame.draw.rect(screen, 'white', (self.pos, (self.width * self.scale, length * self.scale)), 0)
+            screen.blit(self.big, self.pos)
             for i in range(length):
-                pygame.draw.rect(screen, 'black', (self.pos[0], self.pos[1] + i * self.scale,
-                                                   self.width * self.scale + 1, 1 * self.scale + 1), 1)
                 text = font.render(self.choices[i], False, (0, 0, 0))
                 screen.blit(text, (self.x, self.y + i * self.scale))
 
@@ -308,13 +308,13 @@ screen = pygame.display.set_mode(size)
 # init
 board = Board(n)
 board.set_view(25, 200, 50)
-size_list = ListWidget([100, 25, 50, 1])
+size_list = ListWidget([100, 25, 50, 1], [r'images\none.png', r'images\sizes.png'])
 size_list.set_choices([' ' + str(i) for i in range(5, 13)])
 size_list.choose(7)
-moves_list = ListWidget([225, 100, 50, 3])
+moves_list = ListWidget([225, 100, 50, 3], [r'images\move.png', r'images\moves.png'])
 moves_list.set_choices(['   manual', '  rotation', '  up-down', ' left-right', '  random'])
 moves_list.choose(0)
-gravity_list = ListWidget([280, 25, 50, 1.75])
+gravity_list = ListWidget([280, 25, 50, 1.8], [r'images\gravity.png', r'images\gravities.png'])
 gravity_list.set_choices([' none', ' down', '  left', '   up', ' right'])
 gravity_list.choose(0)
 dialog = UpdateDialog('Are you sure?')
